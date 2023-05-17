@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.multi.watflix.review.dto"><!--namespace는 아무거나 들어가도 되는건가 -->
+
+
+	<!--특정 영화로 리뷰리스트보기(매퍼) -->
+	<resultMap type="review" id="selectreview">
+		<result column="review_date" property="review_date" />
+		<result column="review_title" property="review_title" />
+		<result column="review_content" property="review_content" />
+		<result column="rating" property="rating" />
+		<association property="movie" javaType="movie">
+			<result column="movie_title" property="movie_title" />
+		</association>
+		<association property="user" javaType="user">
+			<result column="email" property="email" />
+		</association>
+	</resultMap>
+	<!--특정 영화로 리뷰리스트보기 -->
+	<select id="selectall" parameterType="movie"
+		resultMap="selectreview">
+		select m.movie_title, u.email, r.review_title, r.review_date,r.review_content,r.rating
+		from movie m, user u, review r
+		where r.movie_no=m.movie_no and r.user_no=u.user_no and
+		m.movie_no = #{movie_no}
+	</select>
+
+	<!-- 영화 번호로 해당 영화 리뷰 평점 가져오기 -->
+	<select id="selectAvgRating" parameterType="int"
+		resultType="double">
+		select truncate(avg(r.rating),1) from review r, movie m
+		where m.movie_no = #{movie_no}
+	</select>
+	
+	<!-- 내가 쓴 리뷰 가져오기 (with 영화번호 & 유저번호) -->
+	<select id="selectReviewListByUserNoAndMovieNo" parameterType="review" resultMap="selectreview">
+		SELECT r.*,u.email
+		FROM review r
+		INNER JOIN user u ON r.user_no = u.user_no
+		WHERE r.movie_no = #{movie_no} AND
+			r.user_no = #{user_no};
+	</select>
+
+	<!-- 유저 번호로 해당 리뷰 가져오기 -->
+	<select id="selectListByUserNo" parameterType="int"
+		resultType="review">
+		SELECT r.*
+		FROM review r, user u
+		WHERE r.user_no=u.user_no
+		and u.user_no = #{user_no}
+	</select>
+	<!--리뷰 입력하기 -->
+	<insert id="insert" parameterType="review">
+		insert into review
+		values(null,#{user_no},#{movie_no},sysdate(),#{review_content},#{rating},#{review_title})
+	</insert>
+	<!-- 리뷰갯수 세기  -->
+	<select id="count" resultType="String">
+		select count(review_no) from review
+	</select>
+</mapper>

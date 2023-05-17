@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.multi.watflix.dibs.dto">
+	<insert id="insert" useGeneratedKeys="true" keyProperty="dibs_no" parameterType="dibs">
+		insert into dibs(movie_no,user_no,dibs_date)
+		values(#{movie_no},#{user_no},sysdate())
+	</insert>
+	<delete id="delete">
+		delete from dibs where movie_no = #{movie_no} and user_no = #{user_no}
+	</delete>
+	<select id="select" resultType="dibs" parameterType="java.util.Map">
+		select * from dibs where movie_no=#{movie_no} and user_no = #{user_no}
+	</select>
+	<select id="selectall" resultType="movie" parameterType="int">
+		select m.movie_no as movie_no, 
+		m.movie_title as movie_title, 
+		m.movie_image as movie_image 
+		from dibs d
+		inner join movie m on d.movie_no=m.movie_no
+		where d.user_no = #{user_no}
+	</select>
+	
+	<select id="totalmovies" resultType="movie" parameterType="int">
+		select count(m.movie_no) as movie_total
+		from dibs d
+		inner join movie m on d.movie_no=m.movie_no
+		where d.user_no = #{user_no}
+	</select>
+	
+	<select id="dibslist" resultType="movie" parameterType="map">
+        SELECT m.movie_no as movie_no, 
+		m.movie_title as movie_title, 
+		m.movie_image as movie_image  
+		from dibs d
+		inner join movie m on d.movie_no=m.movie_no
+        LIMIT #{offset}, #{moviesPerPage}
+        where d.user_no = #{user_no}
+    </select>
+</mapper>

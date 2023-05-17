@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.multi.watflix.casting.dto">
+
+	<!-- <resultMap type="casting" id="castingDetail">
+		<id property="casting_no" column="casting_no"/>
+		<result property="casting_image" column="casting_image"/>
+		<result property="casting_name" column="casting_name"/>
+		<result property="casting_job"  column="casting_job"/>
+		<collection property="casting_movie" ofType="kr.multi.watflix.casting.dto.CastingMovieDTO">
+			<id property="casting_movie_no"  column="casting_movie_no"/>
+			<result property="casting_no"  column="casting_no"/>
+			<result property="movie_no"  column="movie_no"/>
+			<association property="movie" javaType="movie">
+				<id property="movie_no"  column="movie_no"/>
+				<result property="movie_image"  column="movie_image"/>
+				<result property="movie_title"  column="movie_title"/>
+			</association>
+		</collection>
+	</resultMap> -->
+
+	<select id="selectall" resultType="casting"
+		parameterType="int">
+		SELECT c.casting_no as casting_no, c.casting_image as casting_image,
+			c.casting_name as casting_name, c.casting_job as casting_job
+		FROM casting c
+		INNER JOIN casting_movie cm 
+			ON c.casting_no=cm.casting_no
+		INNER JOIN movie m 
+			ON cm.movie_no=m.movie_no
+		WHERE m.movie_no = #{movie_no}
+	</select>
+
+	<select id="selectallname" resultType="movie"
+		parameterType="String">
+		SELECT m.movie_no AS movie_no,
+			m.movie_title AS movie_title, 
+			m.movie_image AS movie_image
+		FROM casting c
+		INNER JOIN casting_movie cm 
+			ON c.casting_no=cm.casting_no
+		INNER JOIN movie m 
+			ON cm.movie_no=m.movie_no
+		WHERE c.casting_name = #{casting_name}
+	</select>
+	
+	<select id="seletAllCasting" resultType="casting">
+		SELECT * FROM casting
+		WHERE casting_job = "배우"
+	</select>
+</mapper>

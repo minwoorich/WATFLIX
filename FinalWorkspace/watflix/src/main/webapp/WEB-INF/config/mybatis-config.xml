@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+		<typeAlias type="kr.multi.watflix.casting.dto.CastingDTO"
+			alias="casting" />
+		<typeAlias type="kr.multi.watflix.dibs.dto.DibsDTO"
+			alias="dibs" />
+		<typeAlias type="kr.multi.watflix.movie.dto.MovieDTO"
+			alias="movie" />
+		<typeAlias type="kr.multi.watflix.review.dto.ReviewDTO"
+			alias="review" />
+		<typeAlias type="kr.multi.watflix.stillcut.dto.StillcutDTO"
+			alias="stillcut" />
+		<typeAlias type="kr.multi.watflix.user.dto.UserDTO"
+			alias="user" />
+	</typeAliases>
+	<mappers>
+		<mapper resource="mapper/casting.xml" />
+		<mapper resource="mapper/dibs.xml" />
+		<mapper resource="mapper/movie.xml" />
+		<mapper resource="mapper/review.xml" />
+		<mapper resource="mapper/stillcut.xml" />
+		<mapper resource="mapper/user.xml" />
+	</mappers>
+
+
+</configuration>

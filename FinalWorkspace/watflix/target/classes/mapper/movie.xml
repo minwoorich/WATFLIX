@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.multi.watflix.movie.dto">
+
+	<!-- movie_no로 영화 가져오기 -->
+	<select id="selectByMovieNo" resultType="movie">
+		SELECT * FROM movie
+		WHERE movie_no = #{movie_no};
+	</select>
+
+	<!-- r.rating 전부 구하는 매핑코드 -->
+	<!-- <resultMap type="movie" id="MovieWithRating"> <result property="movie_title" 
+		column="movie_title" /> <result property="movie_image" column="movie_image" 
+		/> <result property="genre" column="genre" /> <collection property="reviews" 
+		ofType="review"> <result property="rating" column="rating"/> </collection> 
+		</resultMap> -->
+
+	<!-- 영화정보 전체 + 평균 별점 가져오는 매핑코드 -->
+	<resultMap type="movie" id="MovieWithRating">
+		<result property="movie_no" column="movie_no" />
+		<result property="movie_title" column="movie_title" />
+		<result property="runningtime" column="runningtime" />
+		<result property="age" column="age" />
+		<result property="movie_summary" column="movie_summary" />
+		<result property="movie_image" column="movie_image" />
+		<result property="genre" column="genre" />
+		<result property="release_date" column="release_date" />
+		<result property="country" column="country" />
+		<result property="avgRating" column="avgRating" />
+		<collection property="reviews" ofType="review">
+			<result property="review_date" column="review_date" />
+			<result property="review_content" column="review_content" />
+			<result property="rating" column="rating" />
+		</collection>
+	</resultMap>
+
+
+<!-- ====================메인화면(index_light.jsp) ==================== -->
+	<!-- 영화 + 별점 -->
+	<select id="selectMovieAndRating" resultMap="MovieWithRating">
+		SELECT
+		m.movie_no,
+		m.movie_title,
+		m.movie_image,
+		m.genre,
+		TRUNCATE(AVG(r.rating),1) AS "avgRating"
+
+		FROM movie m
+		LEFT OUTER JOIN review r
+		ON r.movie_no = m.movie_no
+		GROUP BY m.movie_no
+	</select>
+	
+	<!-- 영화 + 별점 + 내가 리뷰한 -->
+	<select id="selectReviewedMovieAndRating" resultMap="MovieWithRating" parameterType="int">
+		SELECT
+		m.movie_no,
+		m.movie_title,
+		m.movie_image,
+		m.genre,
+		TRUNCATE(AVG(r.rating),1) AS "avgRating"
+      	FROM movie m
+      	INNER JOIN review r ON m.movie_no = r.movie_no
+      	WHERE r.user_no = #{user_no}
+	</select>
+	
+	<!-- 영화 + 별점 + 내가 찜한 -->
+	<select id="selectDibbedMovieAndRating" resultMap="MovieWithRating" parameterType="int">
+		SELECT
+		m.movie_no,
+		m.movie_title,
+		m.movie_image,
+		m.genre,
+		TRUNCATE(AVG(r.rating),1) AS "avgRating"
+      	FROM movie m
+      	INNER JOIN dibs d ON m.movie_no = d.movie_no
+      	INNER JOIN review r ON m.movie_no = r.movie_no
+      	WHERE d.user_no = #{user_no}
+	</select>
+	
+
+	<!-- 전체 영화 가져오기 -->
+	<select id="selectListTotal" resultType="movie">
+		select * from movie
+	</select>
+
+	<!-- 별점 순으로 영화 가져오기 -->
+	<select id="selectListSortByRating" resultMap="MovieWithRating">
+		SELECT
+		m.movie_no,
+		m.movie_title,
+		m.movie_image,
+		m.genre,
+		TRUNCATE(AVG(r.rating),1) AS "avgRating"
+
+		FROM movie m
+		LEFT OUTER JOIN review r
+		ON r.movie_no = m.movie_no
+		GROUP BY m.movie_no
+		ORDER BY avgRating DESC;
+	</select>
+
+	<!-- 리뷰 순으로 영화 가져오기 -->
+	<select id="selectListSortByReview" resultMap="MovieWithRating">
+		SELECT 
+		m.movie_no,
+		m.movie_title,
+		m.movie_image,
+		m.genre,
+		TRUNCATE(AVG(r.rating),1) AS "avgRating"
+		FROM movie m
+		LEFT OUTER JOIN review r 
+		ON m.movie_no = r.movie_no
+		GROUP BY m.movie_no
+		ORDER BY COUNT(r.review_no) DESC
+	</select>
+	
+	
+	<!-- ====================검색화면(moviegridfw.jsp) ==================== -->
+	<select id="searchMovie" parameterType="Map" resultMap="MovieWithRating">
+		SELECT
+			m.movie_no,
+			m.movie_title,
+			m.movie_image,
+  			TRUNCATE(AVG(r.rating),1) AS "avgRating"
+		FROM movie m
+  		LEFT OUTER JOIN review r ON m.movie_no = r.movie_no
+  		LEFT OUTER JOIN casting_movie cm ON m.movie_no = cm.movie_no
+  		LEFT OUTER JOIN casting c ON cm.casting_no = c.casting_no
+  		WHERE
+  			m.movie_title LIKE CONCAT('%', #{keyword}, '%') OR
+  			c.casting_name LIKE CONCAT('%', #{keyword}, '%')
+  		GROUP BY m.movie_no
+  		<where>
+  			<if test="sort=='popularity' and keyword !=''">
+  				ORDER BY COUNT(r.review_no) DESC
+  			</if>
+  			<if test="sort=='rating' and keyword !=''">
+  				ORDER BY avg_rating DESC
+  			</if>
+  			<if test="sort=='date' and keyword !=''">
+  				ORDER BY m.release_date
+  			</if>
+  		</where>
+	</select>
+	
+	<select id="searchMoviePaging" parameterType="Map" resultMap="MovieWithRating">
+		SELECT
+			m.movie_no,
+			m.movie_title,
+			m.movie_image,
+  			TRUNCATE(AVG(r.rating),1) AS "avgRating"
+		FROM movie m
+  		LEFT OUTER JOIN review r ON m.movie_no = r.movie_no
+  		LEFT OUTER JOIN casting_movie cm ON m.movie_no = cm.movie_no
+  		LEFT OUTER JOIN casting c ON cm.casting_no = c.casting_no
+  		WHERE
+  			m.movie_title LIKE CONCAT('%', #{keyword}, '%') OR
+  			c.casting_name LIKE CONCAT('%', #{keyword}, '%')
+  		GROUP BY m.movie_no
+  		<where>
+  			<if test="sort=='popularity' and keyword !=''">
+  				ORDER BY COUNT(r.review_no) DESC
+  			</if>
+  			<if test="sort=='rating' and keyword !=''">
+  				ORDER BY avg_rating DESC
+  			</if>
+  			<if test="sort=='date' and keyword !=''">
+  				ORDER BY m.release_date
+  			</if>
+  		</where>
+  		LIMIT #{pageSize} OFFSET #{start}
+	</select>
+	
+	
+</mapper>

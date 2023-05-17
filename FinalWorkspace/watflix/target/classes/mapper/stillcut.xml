@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.multi.watflix.stillcut.dto">
+	<select id="stillcutall" resultType="stillcut"
+		parameterType="int">
+		select s.stillcut_image as stillcut_image
+		from stillcut s
+		inner join stillcut_movie sm on
+		s.stillcut_no=sm.stillcut_no
+		inner join movie m on sm.movie_no=m.movie_no
+		where m.movie_no = #{movie_no}
+	</select>
+</mapper>
