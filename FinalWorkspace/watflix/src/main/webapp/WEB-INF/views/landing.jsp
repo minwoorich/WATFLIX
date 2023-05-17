@@ -32,33 +32,32 @@
 <script type="text/javascript">
 	//sign-up 패스워드 체크
 	$(document).ready(function() {
-		$("#repassword-2").on("keyup", function() {
-			const queryData = {
-				"pass" : $("#password-2").val(),
-				"repass" : $("#repassword-2").val()
-			}
-			$.ajax({
-				url : "/watflix/sign-up/passChk",
-				type : "post",
-				data : JSON.stringify(queryData),
-				contentType : "application/json",
-				success : success_run,
-				error : error_run
-			});
-		});
-	});
-	function success_run(msg) {
-		if (msg == "비밀번호가 다릅니다") {
-			$("#passChkMsg").text(msg).css('color', 'red');
-		} else {
-			$("#passChkMsg").text(msg).css('color', 'green');
-		}
+   $("#repassword-2").keyup(function(event) {
+      event.preventDefault();//페이지 새로고침 방지
+      const queryData = {
+         "pass": $("#password-2").val(),
+         "repass": $("#repassword-2").val()
+      };
+      $.ajax({
+         url: "/watflix/sign-up/passChk",
+         type: "post",
+         data: JSON.stringify(queryData),
+         contentType: "application/json",
+         success: function(msg) {
+            if (msg === "비밀번호가 다릅니다") {
+               console.log(msg);
+               $("#passChkMsg").text(msg).css('color', 'red');
+            } else {
+               $("#passChkMsg").text(msg).css('color', 'green');
+            }
+         },
+         error: function(xhr, status, error) {
+            alert("xhr: " + xhr + "\nstatus: " + status + "\nerror: " + error);
+         }
+      });
+   });
+});
 
-	}
-	function error_run(obj, msg, statusmsg) {
-		alert("obj : " + obj + " " + "msg : " + msg + " " + "statusmsg : "
-				+ statusmsg);
-	}
 </script>
 <script type="text/javascript">
 	//로그인 용
